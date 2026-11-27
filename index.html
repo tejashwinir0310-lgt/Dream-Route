@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DreamRoute — Early Trip & Fare Tracker</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-content">
+      <div class="brand">
+        <span class="logo">🧭 DreamRoute</span>
+        <span class="tagline">Plan early. Track fares. Go anywhere.</span>
+      </div>
+      <div class="nav-actions">
+        <button type="button" id="simulate-btn" class="btn btn-outline">↻ Simulate Live Update</button>
+        <button type="button" id="theme-toggle" class="btn btn-icon" aria-label="Toggle theme">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Scenic Hero Banner -->
+  <section class="hero-banner">
+    <div class="hero-overlay">
+      <div class="container hero-content">
+        <span class="hero-badge">✨ Early Travel Planner & Fare Radar</span>
+        <h1>From misty mountains to midnight city lights.</h1>
+        <p>Pick your dream destination months ahead or check live flight, train, and bus fares without saving a trip.</p>
+      </div>
+    </div>
+  </section>
+
+  <main class="container">
+    <!-- Trip Planner & Quick Fare Check Card -->
+    <section class="planner-card hero-overlap">
+      <form id="trip-form" class="planner-form" autocomplete="off">
+        <div class="planner-fields">
+          <div class="field autocomplete-wrapper">
+            <label for="origin">From City</label>
+            <input type="text" id="origin" placeholder="Start typing a city..." required />
+            <ul id="origin-dropdown" class="city-dropdown" role="listbox"></ul>
+          </div>
+
+          <div class="field autocomplete-wrapper">
+            <label for="destination">Dream Destination</label>
+            <input type="text" id="destination" placeholder="Where to?" required />
+            <ul id="destination-dropdown" class="city-dropdown" role="listbox"></ul>
+          </div>
+
+          <div class="field">
+            <label for="travel-date">Target Date (dd/mm/yyyy)</label>
+            <input type="date" id="travel-date" required />
+          </div>
+
+          <div class="field">
+            <label for="budget">Max Budget (₹)</label>
+            <input type="number" id="budget" placeholder="What is your budget?" min="100" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">+ Track Trip</button>
+          <button type="button" id="quick-check-btn" class="btn btn-outline">🔍 Check Fares Only</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Visual Inspiration Gallery -->
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>Explore by Vibe</h2>
+          <p class="muted">What vibe are you craving? Pick a mood or click any escape to pre-fill your trip</p>
+        </div>
+
+        <div class="tabs" id="vibe-filters">
+          <button type="button" class="tab active" data-vibe="all">✨ All</button>
+          <button type="button" class="tab" data-vibe="beaches">🏖️ Beaches</button>
+          <button type="button" class="tab" data-vibe="mountains">🏔️ Hills & Peaks</button>
+          <button type="button" class="tab" data-vibe="heritage">🪔 Heritage & Ghats</button>
+          <button type="button" class="tab" data-vibe="city">🌃 City Lights</button>
+        </div>
+      </div>
+
+      <div id="vibe-grid" class="vibe-grid"></div>
+    </section>
+
+    <!-- Saved Dream Trips & Countdowns -->
+    <section class="section">
+      <div class="section-header">
+        <h2>Your Trip Countdowns</h2>
+        <span id="trip-count" class="pill">0 Trips</span>
+      </div>
+      <div id="trips-grid" class="trips-grid"></div>
+    </section>
+
+    <!-- Live Upcoming Transit & Cost Tracker -->
+    <section class="section" id="transit-section">
+      <div class="section-header">
+        <div>
+          <h2>Upcoming Flights, Trains & Buses</h2>
+          <p class="muted" id="last-updated">Live tracker active • Showing all routes</p>
+        </div>
+
+        <div class="controls">
+          <div class="tabs" id="mode-tabs">
+            <button type="button" class="tab active" data-mode="all">All</button>
+            <button type="button" class="tab" data-mode="Flight">✈️ Flights</button>
+            <button type="button" class="tab" data-mode="Train">🚆 Trains</button>
+            <button type="button" class="tab" data-mode="Bus">🚌 Buses</button>
+          </div>
+
+          <select id="route-select" aria-label="Filter by route">
+            <option value="all">All Routes</option>
+          </select>
+
+          <select id="sort-select" aria-label="Sort results">
+            <option value="price-asc">Cheapest First</option>
+            <option value="price-desc">Highest Price</option>
+            <option value="drop">Biggest Price Drop</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="transit-feed" class="transit-feed"></div>
+    </section>
+  </main>
+
+  <!-- Return Trip Prompt Modal (Before Saving a New Trip) -->
+  <div id="return-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="return-modal-title">
+    <div class="modal-card">
+      <h3 id="return-modal-title">Plan a return trip as well?</h3>
+      <p id="return-modal-desc" class="muted">You're saving your outbound trip. Would you also like to track a return journey?</p>
+
+      <div class="field" style="margin-top: 14px;">
+        <label for="return-date-input">Return Date (dd/mm/yyyy)</label>
+        <input type="date" id="return-date-input" />
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="one-way-only-btn" class="btn btn-outline">No, One-Way Only</button>
+        <button type="button" id="add-with-return-btn" class="btn btn-primary">+ Save Both Trips</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reconfirmation Modal for Removing a Trip -->
+  <div id="confirm-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <h3 id="modal-title">Cancel this trip?</h3>
+      <p id="modal-desc" class="muted">Are you sure you want to remove this trip from your countdowns?</p>
+      <div class="modal-actions">
+        <button type="button" id="cancel-delete-btn" class="btn btn-outline">Keep Trip</button>
+        <button type="button" id="confirm-delete-btn" class="btn btn-danger">Yes, Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tactical Green Sweep Radar + Rotating Center Antenna -->
+  <div id="radar-loader" class="radar-backdrop" role="status" aria-live="polite" aria-hidden="true">
+    <div class="radar-box">
+      <div class="radar-scope">
+        <!-- Concentric green rings & 8-spoke radial grid -->
+        <svg class="radar-grid-svg" viewBox="0 0 140 140" aria-hidden="true">
+          <circle cx="70" cy="70" r="64" />
+          <circle cx="70" cy="70" r="48" />
+          <circle cx="70" cy="70" r="32" />
+          <circle cx="70" cy="70" r="16" />
+          <line x1="70" y1="4" x2="70" y2="136" />
+          <line x1="4" y1="70" x2="136" y2="70" />
+          <line x1="23" y1="23" x2="117" y2="117" />
+          <line x1="117" y1="23" x2="23" y2="117" />
+        </svg>
+
+        <!-- Sweeping green radar beam -->
+        <div class="radar-sweep"></div>
+
+        <!-- Rotating Central Antenna -->
+        <span class="radar-center-antenna" aria-hidden="true">📡</span>
+      </div>
+      <p id="radar-text" class="radar-label">Scanning routes & live fares...</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <footer class="footer">
+    <div class="container">
+      <p>DreamRoute • Built from scratch for early planners & explorers • <span id="year"></span></p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
